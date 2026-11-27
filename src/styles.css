@@ -25,6 +25,7 @@
 }
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
+html, body { overflow: hidden; overscroll-behavior: none; }
 body { background: var(--bg); }
 button, select, input { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; text-align: left; }
@@ -35,10 +36,11 @@ p { margin: 0 0 10px; }
 
 .app {
   height: 100%;
+  height: 100dvh;
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr) 320px;
-  grid-template-rows: 46px minmax(0, 1fr);
-  grid-template-areas: 'top top top' 'log brain act';
+  grid-template-rows: 46px minmax(0, 1fr) auto;
+  grid-template-areas: 'top top top' 'log brain act' 'transport brain act';
 }
 .topbar { grid-area: top; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
 .brand { display: flex; align-items: baseline; gap: 8px; }
@@ -82,7 +84,7 @@ select { width: 100%; background: var(--panel-2); border: 1px solid var(--line);
 .kind-thought { --k: var(--thought); } .kind-memory { --k: var(--memory); } .kind-emotion { --k: var(--emotion); } .kind-action { --k: var(--action); }
 
 /* Transport */
-.transport { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--panel-2); }
+.transport { grid-area: transport; border-right: 1px solid var(--line); display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--panel-2); }
 .play { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #1a0f04; display: grid; place-items: center; flex: none; }
 .play:hover { filter: brightness(1.1); }
 .icon { width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; color: var(--muted); flex: none; }
@@ -166,21 +168,82 @@ select { width: 100%; background: var(--panel-2); border: 1px solid var(--line);
 .modal .refs li { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
 .close { position: absolute; top: 14px; right: 14px; }
 
+.tabs { display: none; }
+.toggle em, .seg em { font-style: normal; }
+
 @media (max-width: 1080px) {
-  .app { grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: 46px minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: 'top top' 'log brain' 'log act'; }
+  .app { grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: 46px minmax(0, 1.25fr) minmax(0, 1fr) auto; grid-template-areas: 'top top' 'log brain' 'log act' 'transport act'; }
   .pane-activity { border-left: 0; border-top: 1px solid var(--line); }
 }
-@media (max-width: 720px) {
-  html, body, #root { height: auto; }
-  .app { display: flex; flex-direction: column; height: auto; }
-  .topbar { height: 46px; flex: none; position: sticky; top: 0; z-index: 10; }
+@media (min-width: 721px) and (max-width: 1080px) and (min-height: 521px) {
+  .clock { display: none; } /* leave the narrow column to the scrubber */
+}
+
+/* Phones (portrait and landscape): brain on top, transport always in reach, panels behind tabs. */
+@media (max-width: 720px), (max-height: 520px) and (orientation: landscape) {
+  :root { font-size: 14px; }
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 44px minmax(0, 44dvh) auto auto minmax(0, 1fr);
+    grid-template-areas: 'top' 'brain' 'transport' 'tabs' 'panel';
+  }
+  .topbar { padding: 0 8px 0 14px; }
   .brand-sub, .hint { display: none; }
-  .pane-brain { order: 1; height: 62vh; flex: none; }
-  .pane-log { order: 2; border-right: 0; }
-  .pane-activity { order: 3; }
-  .event-log { max-height: 60vh; }
-  .transport { position: sticky; bottom: 0; z-index: 5; order: -1; }
+  .ghost { min-height: 36px; }
+
+  .pane-log, .pane-activity { grid-area: panel; border: 0; }
+  .app[data-tab='log'] .pane-activity, .app[data-tab='activity'] .pane-log { display: none; }
+  .pane-head { padding: 10px 14px 8px; }
+  select { font-size: 16px; padding: 8px 10px; } /* 16px stops iOS zooming on focus */
+  .panel-scroll, .event-log { padding-bottom: calc(20px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+  .panel-scroll { padding-left: 14px; padding-right: 14px; }
+  .region-list button { padding: 9px 6px; }
+  .quiet button { padding: 6px 10px; font-size: 12.5px; }
+  .back { min-height: 36px; font-size: 13px; }
+
+  .tabs { grid-area: tabs; display: grid; grid-template-columns: 1fr 1fr; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .tabs button { display: flex; align-items: center; justify-content: center; gap: 7px; height: 40px; font-size: 13px; color: var(--muted); border-bottom: 2px solid transparent; }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+
+  .transport { border-right: 0; border-bottom: 1px solid var(--line); padding: 8px 12px; gap: 10px; }
+  .play { width: 40px; height: 40px; }
+  .icon { width: 36px; height: 36px; }
+  .speed { padding: 7px 8px; min-width: 42px; }
+  .scrub input { height: 24px; }
+
+  .toolbar { top: 8px; left: 0; right: 0; padding: 0 10px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 6px; }
+  .toolbar::-webkit-scrollbar { display: none; }
+  .toolbar > * { flex: none; }
+  .seg button, .toggle { padding: 8px 9px; white-space: nowrap; }
+  .toggle em, .seg em, .toggle svg { display: none; }
+  .scale { left: 12px; bottom: 8px; width: 110px; font-size: 10px; }
+  .brain-label { font-size: 10px; gap: 4px; }
+  .brain-label span { padding: 0 4px; }
+  .brain-caption { bottom: 6px; left: auto; right: 10px; font-size: 11px; text-align: right; }
+  .stage.split .brain-caption { left: 12px; right: auto; }
+  .pane-brain:has(.stage.split) .scale { display: none; }
+
+  .modal-backdrop { padding: 0; place-items: end stretch; }
+  .modal { max-width: none; max-height: 88dvh; border-radius: 16px 16px 0 0; border-bottom: 0; padding: 20px 18px calc(24px + env(safe-area-inset-bottom)); }
+  .close { width: 36px; height: 36px; top: 10px; right: 10px; }
+}
+
+@media (max-width: 720px) {
+  .app:has(.stage.split) { grid-template-rows: 44px minmax(0, 52dvh) auto auto minmax(0, 1fr); }
   .stage.split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
   .stage.split .brain-view + .brain-view { border-left: 0; border-top: 1px solid var(--line); }
-  .panel-scroll { overflow: visible; }
+}
+@media (max-width: 380px) {
+  .clock { display: none; }
+}
+
+/* Phone held sideways: brain on the left at full height, everything else on the right. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .app {
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 1fr);
+    grid-template-rows: 40px auto auto minmax(0, 1fr);
+    grid-template-areas: 'top top' 'brain transport' 'brain tabs' 'brain panel';
+  }
+  .pane-brain { border-right: 1px solid var(--line); }
+  .pane-head .setting { display: none; }
 }

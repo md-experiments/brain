@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Columns2, Info, Layers, Pause, Play, RotateCcw, Tag, X } from 'lucide-react';
+import { Activity, Columns2, Info, ListTree, Layers, Pause, Play, RotateCcw, Tag, X } from 'lucide-react';
 import ActivityPanel from './components/ActivityPanel';
 import BrainView, { type CameraSync, type Clock, type HemiMode } from './components/BrainView';
 import EventLog, { formatTime, KIND_META } from './components/EventLog';
@@ -22,6 +22,12 @@ export default function App() {
   const [hemis, setHemis] = useState<HemiMode>('both');
   const [selected, setSelected] = useState<string | null>(null);
   const [about, setAbout] = useState(false);
+  const [tab, setTab] = useState<'log' | 'activity'>('log');
+  // On small screens the two side panels share one slot; picking a region brings its panel forward.
+  const selectRegion = useCallback((id: string | null) => {
+    setSelected(id);
+    if (id) setTab('activity');
+  }, []);
 
   const scenario = SCENARIO_BY_ID[scenarioId];
   const clock = useRef<Clock>({ t: 0 }).current;
@@ -76,7 +82,7 @@ export default function App() {
   };
 
   return (
-    <div className="app">
+    <div className="app" data-tab={tab}>
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark" />
@@ -101,53 +107,63 @@ export default function App() {
           <p className="setting">{scenario.setting}</p>
         </div>
         <EventLog scenario={scenario} time={time} profiles={profiles} onSeek={seek} />
-        <div className="transport">
-          <button type="button" className="play" onClick={togglePlay} aria-label={playing ? 'Pause' : 'Play'}>
-            {playing ? <Pause size={18} /> : <Play size={18} />}
-          </button>
-          <button type="button" className="icon" onClick={() => seek(0)} aria-label="Restart">
-            <RotateCcw size={15} />
-          </button>
-          <div className="scrub">
-            <div className="ticks">
-              {scenario.events.map((ev, i) => (
-                <i key={i} className={`kind-${ev.kind}`} title={KIND_META[ev.kind].label} style={{ left: `${(ev.t / scenario.duration) * 100}%`, width: `${(ev.dur / scenario.duration) * 100}%` }} />
-              ))}
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={scenario.duration}
-              step={0.05}
-              value={time}
-              onChange={(e) => seek(Number(e.target.value))}
-              aria-label="Timeline"
-            />
-          </div>
-          <span className="clock">{formatTime(time)} / {formatTime(scenario.duration)}</span>
-          <button type="button" className="speed" onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length])} aria-label="Playback speed">
-            {speed}×
-          </button>
-        </div>
       </aside>
+
+      <div className="transport">
+        <button type="button" className="play" onClick={togglePlay} aria-label={playing ? 'Pause' : 'Play'}>
+          {playing ? <Pause size={18} /> : <Play size={18} />}
+        </button>
+        <button type="button" className="icon" onClick={() => seek(0)} aria-label="Restart">
+          <RotateCcw size={15} />
+        </button>
+        <div className="scrub">
+          <div className="ticks">
+            {scenario.events.map((ev, i) => (
+              <i key={i} className={`kind-${ev.kind}`} title={KIND_META[ev.kind].label} style={{ left: `${(ev.t / scenario.duration) * 100}%`, width: `${(ev.dur / scenario.duration) * 100}%` }} />
+            ))}
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={scenario.duration}
+            step={0.05}
+            value={time}
+            onChange={(e) => seek(Number(e.target.value))}
+            aria-label="Timeline"
+          />
+        </div>
+        <span className="clock">{formatTime(time)} / {formatTime(scenario.duration)}</span>
+        <button type="button" className="speed" onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length])} aria-label="Playback speed">
+          {speed}×
+        </button>
+      </div>
+
+      <nav className="tabs" aria-label="Panels">
+        <button type="button" className={tab === 'log' ? 'on' : ''} onClick={() => setTab('log')}>
+          <ListTree size={15} /> Events
+        </button>
+        <button type="button" className={tab === 'activity' ? 'on' : ''} onClick={() => setTab('activity')}>
+          <Activity size={15} /> Regions
+        </button>
+      </nav>
 
       <main className="pane pane-brain">
         <div className="toolbar">
           <div className="seg" role="group" aria-label="Hemispheres">
             {(['both', 'L', 'R'] as HemiMode[]).map((h) => (
               <button type="button" key={h} className={hemis === h ? 'on' : ''} onClick={() => setHemis(h)}>
-                {h === 'both' ? 'Both' : h === 'L' ? 'Left only' : 'Right only'}
+                {h === 'both' ? 'Both' : h === 'L' ? 'Left' : 'Right'}{h !== 'both' && <em> only</em>}
               </button>
             ))}
           </div>
           <button type="button" className={`toggle ${glass ? 'on' : ''}`} onClick={() => setGlass(!glass)}>
-            <Layers size={14} /> See-through
+            <Layers size={14} /> <span>See-through</span>
           </button>
           <button type="button" className={`toggle ${labels ? 'on' : ''}`} onClick={() => setLabels(!labels)}>
             <Tag size={14} /> Labels
           </button>
           <button type="button" className={`toggle ${compare ? 'on' : ''}`} onClick={() => setCompare(!compare)}>
-            <Columns2 size={14} /> Compare people
+            <Columns2 size={14} /> <span>Compare<em> people</em></span>
           </button>
         </div>
         <div className={`stage ${compare ? 'split' : ''}`}>
@@ -162,7 +178,7 @@ export default function App() {
               labels={labels}
               sync={sync}
               caption={compare ? p.name : undefined}
-              onSelect={setSelected}
+              onSelect={selectRegion}
             />
           ))}
         </div>
@@ -197,7 +213,7 @@ export default function App() {
             </p>
           ))}
         </div>
-        <ActivityPanel scenario={scenario} profiles={profiles} time={time} selected={selected} onSelect={setSelected} />
+        <ActivityPanel scenario={scenario} profiles={profiles} time={time} selected={selected} onSelect={selectRegion} />
       </aside>
 
       {about && (

@@ -242,6 +242,7 @@ function glowTexture(): THREE.Texture {
 }
 
 const MAX_LABELS = 7;
+const MAX_LABELS_NARROW = 4;
 const CENTER = new THREE.Vector3(0, -18, 12); // MNI-space pivot
 
 export default function BrainView(props: Props) {
@@ -508,7 +509,7 @@ export default function BrainView(props: Props) {
           });
         }
         ranked.sort((p, q) => q.score - p.score);
-        ranked.length = Math.min(ranked.length, MAX_LABELS);
+        ranked.length = Math.min(ranked.length, hgt < 240 ? 2 : w < 480 ? MAX_LABELS_NARROW : MAX_LABELS);
       }
       const placed: { x: number; y: number }[] = [];
       labelEls.forEach((el, i) => {
@@ -523,7 +524,7 @@ export default function BrainView(props: Props) {
         let y = (-tmpVec.y * 0.5 + 0.5) * hgt;
         // Nudge apart labels that would sit on top of each other.
         for (let pass = 0; pass < 4; pass++)
-          for (const p of placed) if (Math.abs(p.x - x) < 130 && Math.abs(p.y - y) < 19) y = p.y + 19;
+          for (const p of placed) if (Math.abs(p.x - x) < (w < 480 ? 105 : 130) && Math.abs(p.y - y) < 19) y = p.y + 19;
         placed.push({ x, y });
         el.style.opacity = String(Math.min(1, 0.35 + r.score));
         el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
