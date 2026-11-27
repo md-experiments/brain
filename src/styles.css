@@ -115,10 +115,15 @@ select { width: 100%; background: var(--panel-2); border: 1px solid var(--line);
 .brain-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .brain-label { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; font-size: 11px; white-space: nowrap; transition: opacity 0.25s; opacity: 0; will-change: transform; margin: -4px 0 0 -4px; text-shadow: 0 1px 3px #000, 0 0 8px #000; }
 .brain-label i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid #fff; background: rgba(0, 0, 0, 0.35); flex: none; }
+.brain-label.flip { flex-direction: row-reverse; }
 .brain-label u { text-decoration: none; color: #b9c0cc; }
 .brain-label b { font-weight: 600; color: #fff; }
 .brain-label span { background: rgba(10, 12, 16, 0.72); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.14); }
 .brain-caption { position: absolute; left: 0; right: 0; bottom: 54px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--text); pointer-events: none; }
+.brain-feeling { position: absolute; top: 56px; left: 12px; display: flex; align-items: baseline; gap: 8px; padding: 4px 10px; border-radius: 7px; background: color-mix(in srgb, var(--emotion) 14%, rgba(12, 14, 18, 0.8)); border: 1px solid color-mix(in srgb, var(--emotion) 40%, transparent); pointer-events: none; opacity: 0; transition: opacity 0.4s; }
+.brain-feeling span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--emotion); font-weight: 600; }
+.brain-feeling b { display: inline-block; font-size: 13px; font-weight: 600; }
+.brain-feeling b::first-letter { text-transform: uppercase; }
 .brain-status { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); pointer-events: none; }
 .scale { position: absolute; left: 16px; bottom: 14px; font-size: 10.5px; color: var(--muted); display: grid; gap: 3px; width: 150px; pointer-events: none; }
 .scale i { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #4a4340, #b80d08 25%, #ff7a0d 62%, #ffed8c); }
@@ -160,7 +165,11 @@ select { width: 100%; background: var(--panel-2); border: 1px solid var(--line);
 .evidence { font-size: 10.5px; white-space: nowrap; padding: 0 6px; border-radius: 4px; border: 1px solid; }
 .evidence-strong { color: #7fc8a0; } .evidence-moderate { color: #d9bd6a; } .evidence-debated { color: #e08a6c; }
 .refs { margin: 0 0 8px; padding-left: 16px; font-size: 11.5px; color: var(--muted); }
-.refs li { margin-bottom: 4px; }
+.refs li { margin-bottom: 6px; }
+.refs a { color: inherit; text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 2px; }
+.refs a:hover { color: var(--text); text-decoration-color: var(--accent); }
+.refs a svg { margin-left: 4px; vertical-align: -1px; opacity: 0.7; }
+.ref-finding { display: block; color: var(--faint); margin-top: 1px; }
 
 /* Modal */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(4, 5, 8, 0.72); display: grid; place-items: center; z-index: 20; padding: 16px; }

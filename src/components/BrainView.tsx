@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Profile } from '../model/profiles';
 import { UNITS, type Unit, type Vec3 } from '../model/regions';
 import type { Scenario } from '../model/scenarios';
-import { meaning, simulate } from '../model/simulate';
+import { feelingNow, meaning, simulate } from '../model/simulate';
 
 export interface Clock {
   t: number;
@@ -248,6 +248,7 @@ const CENTER = new THREE.Vector3(0, -18, 12); // MNI-space pivot
 export default function BrainView(props: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
+  const feelingRef = useRef<HTMLDivElement>(null);
   const live = useRef(props);
   live.current = props;
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -440,6 +441,12 @@ export default function BrainView(props: Props) {
       raf = requestAnimationFrame(frame);
       const { clock, scenario, profile, glass, hemis, labels } = live.current;
       const act = simulate(scenario, profile, clock.t);
+      const feeling = feelingNow(scenario, profile, clock.t);
+      const feelingEl = feelingRef.current;
+      if (feelingEl) {
+        feelingEl.style.opacity = feeling ? '1' : '0';
+        if (feeling && feelingEl.lastElementChild!.textContent !== feeling) feelingEl.lastElementChild!.textContent = feeling;
+      }
       controls.update();
 
       if (cortexMat.transparent !== glass) {
@@ -528,7 +535,10 @@ export default function BrainView(props: Props) {
           for (const p of placed) if (Math.abs(p.x - x) < (w < 480 ? 150 : 190) && Math.abs(p.y - y) < 19) y = p.y + 19;
         placed.push({ x, y });
         el.style.opacity = String(Math.min(1, 0.35 + r.score));
-        el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+        // Near the right edge, hang the label to the left of its dot so the text is not cut off.
+        const flip = x + el.offsetWidth > w - 6 && x > w / 2;
+        el.classList.toggle('flip', flip);
+        el.style.transform = `translate(${(flip ? x - el.offsetWidth + 8 : x).toFixed(1)}px, ${y.toFixed(1)}px)`;
         const [nameEl, meanEl] = (el.lastElementChild as HTMLElement).children;
         if (nameEl.textContent !== r.text) nameEl.textContent = r.text;
         const what = meaning(scenario, profile, clock.t, r.unit.region.id, r.unit.hemi);
@@ -558,6 +568,7 @@ export default function BrainView(props: Props) {
     <div className="brain-view">
       <div className="brain-canvas" ref={hostRef} />
       <div className="brain-labels" ref={labelRef} />
+      <div className="brain-feeling" ref={feelingRef} aria-live="polite"><span>Feeling</span><b /></div>
       {props.caption && <div className="brain-caption">{props.caption}</div>}
       {status === 'loading' && <div className="brain-status">Loading cortical surface…</div>}
       {status === 'error' && <div className="brain-status">The brain surface could not be loaded.</div>}

@@ -24,7 +24,7 @@ Everything lives in `src/model/`:
 | File | Contents |
 | --- | --- |
 | `regions.ts` | 31 regions with approximate MNI coordinates and a one-line role |
-| `processes.ts` | Mental processes (hearing, reading, threat response, regulation…) → weighted regions, evidence grade and references |
+| `processes.ts` | Mental processes (hearing, reading, threat response, regulation…) → weighted regions, what each region contributes in plain words, evidence grade and references |
 | `scenarios.ts` | Seven timelines of events, each tagged with the processes it involves and, for feelings, an everyday name (e.g. "grief") |
 | `profiles.ts` | Individual-difference profiles: region/process gains, regulation efficacy, sensitive topics |
 | `simulate.ts` | Pure function `(scenario, profile, time) → activity per region` |
@@ -40,7 +40,7 @@ This is an **illustrative model, not a measurement or a prediction**.
 - Activity values are a schematic 0–1 "relative engagement", and timing is faster than a real haemodynamic response.
 - Profiles encode reported group-level tendencies; individuals vary widely.
 - Region centres are approximate and drawn as soft patches. Deep structures, cerebellum and brainstem are simplified shapes.
-- **Citations were written from general knowledge and have not yet been verified line by line against the source papers.** That verification pass is the next step before presenting this as a reference.
+- **Citations.** Every reference links to its DOI. Bibliographic details were checked against Crossref, and each one-line summary against the paper's abstract — not the full text. Scoville & Milner (1957) and Penfield & Boldrey (1937) have no indexed abstract. The numeric weights in `processes.ts` are still my own schematic judgement, not values taken from the papers.
 
 ## Anatomy data
 

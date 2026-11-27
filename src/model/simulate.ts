@@ -1,6 +1,6 @@
 import { PROCESSES, weightFor } from './processes';
 import type { Profile } from './profiles';
-import { UNITS } from './regions';
+import { REGION_BY_ID, UNITS } from './regions';
 import type { Scenario, ScenarioEvent } from './scenarios';
 
 /**
@@ -91,31 +91,56 @@ export function contributors(scenario: Scenario, profile: Profile, t: number, re
   return rows.sort((a, b) => b.share - a.share);
 }
 
-/**
- * Everyday word for what a region is doing right now: the strongest process
- * currently driving it (or the feeling named by the event, for affective
- * processes). Context-dependent on purpose, since every region serves several functions.
- */
-export function meaning(scenario: Scenario, profile: Profile, t: number, regionId: string, hemi?: 'L' | 'R' | 'M'): string {
-  let best = '';
-  let bestV = 0.03;
+type Contribution = { ev: ScenarioEvent; pid: string; v: number };
+
+/** Every (event, process) pair active at time t, with its current strength. */
+function contributions(scenario: Scenario, profile: Profile, t: number): Contribution[] {
+  const out: Contribution[] = [];
   for (const ev of scenario.events) {
     if (t < ev.t) continue;
     const sensitive = isSensitive(ev, profile);
     for (const [pid, intensity] of ev.processes) {
       const proc = PROCESSES[pid];
-      const w = proc.regions[regionId];
-      const weight = hemi ? weightFor(w, hemi) : Math.max(weightFor(w, 'L'), weightFor(w, 'R'), weightFor(w, 'M'));
-      if (!weight) continue;
       const tail = proc.affective ? AFFECT_TAIL * profile.affectTail : TAIL;
       const gain = (profile.processGain[pid] ?? 1) * (proc.affective && sensitive ? profile.topicGain : 1);
-      const v = intensity * envelope(ev, t, tail) * gain * weight;
-      if (v > bestV) {
-        bestV = v;
-        best = (proc.affective && ev.feeling) || proc.plain;
-      }
+      const v = intensity * envelope(ev, t, tail) * gain;
+      if (v > 0.02) out.push({ ev, pid, v });
     }
   }
-  if (!best && DMN_REGIONS.includes(regionId)) return 'mind at rest';
+  return out;
+}
+
+/**
+ * Everyday phrase for this region's own part in what is happening right now.
+ * Several regions are usually active together, each doing something different:
+ * during a fright the amygdala detects the danger while the hypothalamus speeds
+ * the heart. The phrase comes from the process currently driving the region most.
+ */
+export function meaning(scenario: Scenario, profile: Profile, t: number, regionId: string, hemi?: 'L' | 'R' | 'M'): string {
+  let best = '';
+  let bestV = 0.03;
+  for (const { pid, v } of contributions(scenario, profile, t)) {
+    const proc = PROCESSES[pid];
+    const w = proc.regions[regionId];
+    const weight = hemi ? weightFor(w, hemi) : Math.max(weightFor(w, 'L'), weightFor(w, 'R'), weightFor(w, 'M'));
+    if (v * weight > bestV) {
+      bestV = v * weight;
+      best = proc.roles?.[regionId] ?? REGION_BY_ID[regionId].job;
+    }
+  }
+  if (!best && DMN_REGIONS.includes(regionId)) return 'idling: mind at rest';
+  return best;
+}
+
+/** The overall feeling right now, as named by the scenario (e.g. "grief"), or '' if none. */
+export function feelingNow(scenario: Scenario, profile: Profile, t: number): string {
+  let best = '';
+  let bestV = 0.12;
+  for (const { ev, pid, v } of contributions(scenario, profile, t)) {
+    if (ev.feeling && PROCESSES[pid].affective && v > bestV) {
+      bestV = v;
+      best = ev.feeling;
+    }
+  }
   return best;
 }

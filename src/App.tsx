@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Activity, Columns2, Info, ListTree, Layers, Pause, Play, RotateCcw, Tag, X } from 'lucide-react';
 import ActivityPanel from './components/ActivityPanel';
+import Citation from './components/Citation';
 import BrainView, { type CameraSync, type Clock, type HemiMode } from './components/BrainView';
 import EventLog, { formatTime, KIND_META } from './components/EventLog';
 import { PROFILES, PROFILE_BY_ID } from './model/profiles';
@@ -231,11 +232,11 @@ export default function App() {
               <li><strong>Intensity.</strong> Colour shows relative engagement on an arbitrary 0–100 scale. Timing is sped up: the blood-flow signal measured by fMRI lags by several seconds.</li>
               <li><strong>Regions are not modules.</strong> Every region shown takes part in many functions, and no emotion lives in one place (Lindquist 2012). Seeing a region light up does not reveal what someone is thinking (Poldrack 2006).</li>
               <li><strong>People.</strong> Profiles apply group-level differences reported for trait anxiety and habitual reappraisal. Real individuals vary widely and overlap between groups is large.</li>
-              <li><strong>Citations</strong> were entered from general knowledge and have not yet been checked line by line against the papers.</li>
+              <li><strong>Citations.</strong> Every reference was checked against its Crossref record, and each one-line summary against the paper’s abstract (not the full text). Two classics from 1937 and 1957 have no abstract to check against.</li>
             </ul>
             <h3>Sources</h3>
             <ol className="refs">
-              {Object.values(REFERENCES).map((r) => <li key={r.id}>{r.cite}</li>)}
+              {Object.values(REFERENCES).map((r) => <Citation key={r.id} id={r.id} finding />)}
             </ol>
           </div>
         </div>

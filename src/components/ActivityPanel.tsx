@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { PROCESSES, type Evidence } from '../model/processes';
 import type { Profile } from '../model/profiles';
-import { REFERENCES } from '../model/references';
+import Citation from './Citation';
 import { REGIONS, REGION_BY_ID } from '../model/regions';
 import type { Scenario } from '../model/scenarios';
 import { contributors, meaning, regionPeak, simulate } from '../model/simulate';
@@ -65,7 +65,7 @@ export default function ActivityPanel({ scenario, profiles, time, selected, onSe
             <p>{proc.basis}</p>
             <ul className="refs">
               {proc.refs.map((id) => (
-                <li key={id}>{REFERENCES[id].cite}</li>
+                <Citation key={id} id={id} />
               ))}
             </ul>
           </section>
