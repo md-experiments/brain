@@ -90,3 +90,32 @@ export function contributors(scenario: Scenario, profile: Profile, t: number, re
   }
   return rows.sort((a, b) => b.share - a.share);
 }
+
+/**
+ * Everyday word for what a region is doing right now: the strongest process
+ * currently driving it (or the feeling named by the event, for affective
+ * processes). Context-dependent on purpose, since every region serves several functions.
+ */
+export function meaning(scenario: Scenario, profile: Profile, t: number, regionId: string, hemi?: 'L' | 'R' | 'M'): string {
+  let best = '';
+  let bestV = 0.03;
+  for (const ev of scenario.events) {
+    if (t < ev.t) continue;
+    const sensitive = isSensitive(ev, profile);
+    for (const [pid, intensity] of ev.processes) {
+      const proc = PROCESSES[pid];
+      const w = proc.regions[regionId];
+      const weight = hemi ? weightFor(w, hemi) : Math.max(weightFor(w, 'L'), weightFor(w, 'R'), weightFor(w, 'M'));
+      if (!weight) continue;
+      const tail = proc.affective ? AFFECT_TAIL * profile.affectTail : TAIL;
+      const gain = (profile.processGain[pid] ?? 1) * (proc.affective && sensitive ? profile.topicGain : 1);
+      const v = intensity * envelope(ev, t, tail) * gain * weight;
+      if (v > bestV) {
+        bestV = v;
+        best = (proc.affective && ev.feeling) || proc.plain;
+      }
+    }
+  }
+  if (!best && DMN_REGIONS.includes(regionId)) return 'mind at rest';
+  return best;
+}

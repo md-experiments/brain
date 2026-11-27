@@ -4,7 +4,7 @@ import type { Profile } from '../model/profiles';
 import { REFERENCES } from '../model/references';
 import { REGIONS, REGION_BY_ID } from '../model/regions';
 import type { Scenario } from '../model/scenarios';
-import { contributors, regionPeak, simulate } from '../model/simulate';
+import { contributors, meaning, regionPeak, simulate } from '../model/simulate';
 
 const EVIDENCE_LABEL: Record<Evidence, string> = {
   strong: 'Well established',
@@ -95,6 +95,7 @@ export default function ActivityPanel({ scenario, profiles, time, selected, onSe
             <button type="button" onClick={() => onSelect(r.id)}>
               <span className="region-name">
                 {r.short}
+                <b>{meaning(scenario, profiles[0], time, r.id)}</b>
                 <em>{side(peaks[0])}</em>
               </span>
               <span className="bars">

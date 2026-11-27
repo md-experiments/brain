@@ -25,7 +25,7 @@ Everything lives in `src/model/`:
 | --- | --- |
 | `regions.ts` | 31 regions with approximate MNI coordinates and a one-line role |
 | `processes.ts` | Mental processes (hearing, reading, threat response, regulation…) → weighted regions, evidence grade and references |
-| `scenarios.ts` | Timelines of events, each tagged with the processes it involves |
+| `scenarios.ts` | Seven timelines of events, each tagged with the processes it involves and, for feelings, an everyday name (e.g. "grief") |
 | `profiles.ts` | Individual-difference profiles: region/process gains, regulation efficacy, sensitive topics |
 | `simulate.ts` | Pure function `(scenario, profile, time) → activity per region` |
 | `references.ts` | Bibliography |

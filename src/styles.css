@@ -115,6 +115,8 @@ select { width: 100%; background: var(--panel-2); border: 1px solid var(--line);
 .brain-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .brain-label { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; font-size: 11px; white-space: nowrap; transition: opacity 0.25s; opacity: 0; will-change: transform; margin: -4px 0 0 -4px; text-shadow: 0 1px 3px #000, 0 0 8px #000; }
 .brain-label i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid #fff; background: rgba(0, 0, 0, 0.35); flex: none; }
+.brain-label u { text-decoration: none; color: #b9c0cc; }
+.brain-label b { font-weight: 600; color: #fff; }
 .brain-label span { background: rgba(10, 12, 16, 0.72); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.14); }
 .brain-caption { position: absolute; left: 0; right: 0; bottom: 54px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--text); pointer-events: none; }
 .brain-status { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); pointer-events: none; }
@@ -133,8 +135,9 @@ select { width: 100%; background: var(--panel-2); border: 1px solid var(--line);
 .region-list { list-style: none; margin: 0; padding: 0; }
 .region-list button { display: block; width: 100%; padding: 6px 6px; border-radius: 6px; }
 .region-list button:hover, .quiet button:hover { background: var(--panel-2); color: var(--text); }
-.region-name { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px; }
-.region-name em { font-style: normal; font-size: 10.5px; color: var(--faint); letter-spacing: 0.04em; }
+.region-name { display: flex; gap: 6px; align-items: baseline; font-size: 12.5px; margin-bottom: 4px; }
+.region-name b { font-weight: 400; color: var(--muted); }
+.region-name em { margin-left: auto; padding-left: 8px; font-style: normal; font-size: 10.5px; color: var(--faint); letter-spacing: 0.04em; }
 .bars { display: grid; gap: 2px; }
 .bar { display: block; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
 .bar i { display: block; height: 100%; border-radius: 2px; transition: width 0.12s linear; }

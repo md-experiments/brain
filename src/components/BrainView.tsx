@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Profile } from '../model/profiles';
 import { UNITS, type Unit, type Vec3 } from '../model/regions';
 import type { Scenario } from '../model/scenarios';
-import { simulate } from '../model/simulate';
+import { meaning, simulate } from '../model/simulate';
 
 export interface Clock {
   t: number;
@@ -386,7 +386,7 @@ export default function BrainView(props: Props) {
     for (let i = 0; i < MAX_LABELS; i++) {
       const el = document.createElement('div');
       el.className = 'brain-label';
-      el.innerHTML = '<i></i><span></span>';
+      el.innerHTML = '<i></i><span><u></u><b></b></span>';
       labelHost.appendChild(el);
       labelEls.push(el);
     }
@@ -490,7 +490,7 @@ export default function BrainView(props: Props) {
       camLocal.copy(camera.position);
       brain.worldToLocal(camLocal);
       const visible = (u: Unit) => u.hemi === 'M' || hemis === 'both' || hemis === u.hemi;
-      const ranked: { text: string; pos: Vec3; score: number }[] = [];
+      const ranked: { text: string; unit: Unit; pos: Vec3; score: number }[] = [];
       if (labels) {
         for (const u of UNITS) {
           const a = act[u.id] ?? 0;
@@ -503,6 +503,7 @@ export default function BrainView(props: Props) {
           const lateral = u.region.kind === 'cortex' && !u.region.deep && !medial;
           if (lateral && hemis === 'both' && Math.sign(u.center[0]) !== Math.sign(camLocal.x)) continue;
           ranked.push({
+            unit: u,
             text: u.hemi === 'M' || paired ? u.region.short : `${u.region.short} · ${u.hemi}`,
             pos: paired ? [0, u.center[1], u.center[2]] : u.center,
             score: paired ? Math.max(a, act[other]) : a,
@@ -524,12 +525,15 @@ export default function BrainView(props: Props) {
         let y = (-tmpVec.y * 0.5 + 0.5) * hgt;
         // Nudge apart labels that would sit on top of each other.
         for (let pass = 0; pass < 4; pass++)
-          for (const p of placed) if (Math.abs(p.x - x) < (w < 480 ? 105 : 130) && Math.abs(p.y - y) < 19) y = p.y + 19;
+          for (const p of placed) if (Math.abs(p.x - x) < (w < 480 ? 150 : 190) && Math.abs(p.y - y) < 19) y = p.y + 19;
         placed.push({ x, y });
         el.style.opacity = String(Math.min(1, 0.35 + r.score));
         el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-        const span = el.lastElementChild as HTMLSpanElement;
-        if (span.textContent !== r.text) span.textContent = r.text;
+        const [nameEl, meanEl] = (el.lastElementChild as HTMLElement).children;
+        if (nameEl.textContent !== r.text) nameEl.textContent = r.text;
+        const what = meaning(scenario, profile, clock.t, r.unit.region.id, r.unit.hemi);
+        const whatText = what ? ` (${what})` : '';
+        if (meanEl.textContent !== whatText) meanEl.textContent = whatText;
       });
     };
     frame();

@@ -38,7 +38,7 @@ export const PROFILES: Profile[] = [
     processGain: { threat: 1.25, negative_affect: 1.2, arousal: 1.25, reward: 0.85 },
     regulationEfficacy: 0.45,
     affectTail: 1.9,
-    sensitiveTopics: ['criticism', 'threat'],
+    sensitiveTopics: ['criticism', 'threat', 'scrutiny'],
     topicGain: 1.45,
     refs: ['etkin2007', 'stein2007', 'bishop2007'],
   },
@@ -63,4 +63,5 @@ export const TOPIC_LABEL: Record<string, string> = {
   criticism: 'Criticism',
   threat: 'Possible danger',
   loss: 'Loss',
+  scrutiny: 'Being judged',
 };
